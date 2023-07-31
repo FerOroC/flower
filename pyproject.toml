@@ -10,7 +10,7 @@ license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
 homepage = "https://flower.dev"
-repository = "https://github.com/adap/flower"
+repository = "https://github.com/FerOroC/flower"
 documentation = "https://flower.dev"
 keywords = [
     "flower",
