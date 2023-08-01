@@ -67,7 +67,7 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
-        print("Num Avail Clients: ", self.client_manager.num_available())
+        print("Num Avail Clients: ", client_manager.num_available())
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
