@@ -67,7 +67,6 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
-        print("Num Avail Clients: ", client_manager.num_available())
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -85,7 +84,7 @@ class Server:
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
-
+        print("Num Avail Clients: ", self._client_manager.num_available())
         # Initialize parameters
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(timeout=timeout)
