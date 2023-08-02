@@ -68,6 +68,11 @@ class Server:
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
 
+        #Below, define list of parameters of each client 
+        self.list_parameters: List[Parameters] = [Parameters(
+            tensors=[], tensor_type="numpy.ndarray"
+        )] * self.max_workers
+
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
         self.max_workers = max_workers
@@ -87,7 +92,9 @@ class Server:
         print("Num Avail Clients: ", self._client_manager.num_available())
         # Initialize parameters
         log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
+        self.list_parameters = self._get_initial_parameters(timeout=timeout)
+        log(INFO, f"List of initial global parameters: {self.list_parameters}")
+        self.parameters = self.list_parameters[0]
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
@@ -111,15 +118,18 @@ class Server:
                 timeout=timeout,
             )
             if res_fit is not None:
-                parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
-                if parameters_prime:
-                    self.parameters = parameters_prime
+                parameters_list, fit_metrics, _ = res_fit  # fit_metrics_aggregated
+                log(INFO, f"Parameters after round {current_round} after fit round method are {parameters_list}")
+                if parameters_list:
+                    self.list_parameters= parameters_list
+                    print("length of parameters list right after fit_round in fit method Server class (should be = num client): ", len(self.list_parameters))
                 history.add_metrics_distributed_fit(
                     server_round=current_round, metrics=fit_metrics
                 )
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
+            # Evaluation should be performed on list of models
+            res_cen = self.strategy.evaluate(current_round, list_parameters=self.list_parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -136,6 +146,7 @@ class Server:
                 )
 
             # Evaluate model on a sample of available clients
+             
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed is not None:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
@@ -162,9 +173,10 @@ class Server:
     ]:
         """Validate current global model on a number of clients."""
         # Get clients and their respective instructions from strategy
+        # client instructions should be  list where each item is a tuple of client proxy, and EvaluateIns (tuple of params and config)
         client_instructions = self.strategy.configure_evaluate(
             server_round=server_round,
-            parameters=self.parameters,
+            list_parameters=self.list_parameters,
             client_manager=self._client_manager,
         )
         if not client_instructions:
@@ -193,6 +205,7 @@ class Server:
         )
 
         # Aggregate the evaluation results
+        # here now, confirm functioning of aggregate_evaluate for separate model params 
         aggregated_result: Tuple[
             Optional[float],
             Dict[str, Scalar],
@@ -212,7 +225,7 @@ class Server:
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
-            parameters=self.parameters,
+            parameters=self.list_parameters,
             client_manager=self._client_manager,
         )
 
@@ -242,13 +255,14 @@ class Server:
         )
 
         # Aggregate training results
-        aggregated_result: Tuple[
-            Optional[Parameters],
+        # Aggregate Fit should not aggregate parameters, just metrics
+        aggregated_result: List[Tuple[
+            Optional[Parameters]],
             Dict[str, Scalar],
         ] = self.strategy.aggregate_fit(server_round, results, failures)
 
-        parameters_aggregated, metrics_aggregated = aggregated_result
-        return parameters_aggregated, metrics_aggregated, (results, failures)
+        parameters_list, metrics_aggregated = aggregated_result
+        return parameters_list, metrics_aggregated, (results, failures)
 
     def disconnect_all_clients(self, timeout: Optional[float]) -> None:
         """Send shutdown signal to all clients."""
@@ -277,8 +291,14 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
+        print("Random parameters sampled at get initial parameters method: ", get_parameters_res)
         log(INFO, "Received initial parameters from one random client")
-        return get_parameters_res.parameters
+        log(INFO, "Using parameters to initialise model for all clients")
+
+        empty_list = []
+        for i in range(self._client_manager.num_available()):
+            empty_list.append(get_parameters_res.parameters*i)
+        return [get_parameters_res.parameters] * self._client_manager.num_available()
 
 
 def reconnect_clients(
