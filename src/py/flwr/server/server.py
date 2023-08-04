@@ -68,10 +68,12 @@ class Server:
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
 
+        print(f"Num clients available (should be 4): {self._client_manager.num_available()} and type {type(self._client_manager.num_available())}")
+
         #Below, define list of parameters of each client 
         self.list_parameters: List[Parameters] = [Parameters(
             tensors=[], tensor_type="numpy.ndarray"
-        )] * self.max_workers
+        )] * self._client_manager.num_available()
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
