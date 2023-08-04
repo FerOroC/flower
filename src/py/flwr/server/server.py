@@ -278,7 +278,7 @@ class Server:
             timeout=timeout,
         )
 
-    def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
+    def _get_initial_parameters(self, timeout: Optional[float]) -> List[Parameters]:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
@@ -293,14 +293,14 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
-        print("Random parameters sampled at get initial parameters method: ", get_parameters_res)
+        print("Random parameters sampled at get initial parameters method: ", type(get_parameters_res))
         log(INFO, "Received initial parameters from one random client")
         log(INFO, "Using parameters to initialise model for all clients")
 
-        empty_list = []
+        parameters_list = []
         for i in range(self._client_manager.num_available()):
-            empty_list.append(get_parameters_res.parameters*i)
-        return [get_parameters_res.parameters] * self._client_manager.num_available()
+            parameters_list.append(get_parameters_res.parameters*i)
+        return parameters_list
 
 
 def reconnect_clients(
