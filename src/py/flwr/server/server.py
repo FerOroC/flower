@@ -95,7 +95,6 @@ class Server:
         # Initialize parameters
         log(INFO, "Initializing global parameters")
         self.list_parameters = self._get_initial_parameters(timeout=timeout)
-        log(INFO, f"List of initial global parameters: {self.list_parameters}")
         self.parameters = self.list_parameters[0]
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
@@ -300,6 +299,8 @@ class Server:
         parameters_list = []
         for i in range(self._client_manager.num_available()):
             parameters_list.append(get_parameters_res.parameters*i)
+
+        print(f"Parameters list type: {type(parameters_list)} and length is {len(parameters_list)}")
         return parameters_list
 
 
