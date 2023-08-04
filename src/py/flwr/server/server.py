@@ -75,7 +75,7 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )] * self._client_manager.num_available()
 
-        log(INFO, f"Length of list parameters class var {len(self.list_parameters)})
+        log(INFO, f"Length of list parameters class var {len(self.list_parameters)}")
         
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
