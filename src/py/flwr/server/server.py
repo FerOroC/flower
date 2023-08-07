@@ -101,7 +101,7 @@ class Server:
         self.list_parameters = self._get_initial_parameters(timeout=timeout)
         self.parameters = self.list_parameters[0]
         log(INFO, "Evaluating initial parameters")
-        res = self.strategy.evaluate(0, parameters=self.parameters)
+        res = self.strategy.evaluate(0, list_parameters=self.parameters)
         if res is not None:
             log(
                 INFO,
