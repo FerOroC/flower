@@ -297,7 +297,7 @@ class Server:
         parameters_list = []
         for i in range(self._client_manager.num_available()):
             param_first_val = parameters_to_ndarrays(get_parameters_res.parameters)
-            print(f"param first value: {param_first_val[0][0]}, len: {len(param_first_val)}, type: {type(param_first_val)}")
+            print(f"param first value: {param_first_val[0][0]}, len: {len(param_first_val)}, type: {type(param_first_val)}, type of item within list: {type(param_first_val[0])}")
             param_second_val = full_like(param_first_val, i)
             print(f"param second value: {param_second_val[0]}, len: {len(param_first_val)}")
             param_val = ndarrays_to_parameters(param_second_val)
