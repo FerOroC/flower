@@ -230,7 +230,7 @@ class Server:
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
-            parameters=self.list_parameters,
+            list_parameters=self.list_parameters,
             client_manager=self._client_manager,
         )
 
