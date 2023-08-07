@@ -300,7 +300,7 @@ class Server:
             param_first_val = parameters_to_ndarrays(get_parameters_res.parameters)
             print(f"param first value: {param_first_val[0][0]}, len: {len(param_first_val)}, type: {type(param_first_val)}, type of item within list: {type(param_first_val[0])}")
             for item in param_first_val:
-                param_list.append(item*2)
+                param_list.append(item*i)
             print(f"param second value: {param_list[0]}, len: {len(param_list)}")
             param_val = ndarrays_to_parameters(param_list)
             parameters_list.append(param_val)
