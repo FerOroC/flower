@@ -70,14 +70,10 @@ class Server:
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
 
-        print(f"Num clients available (should be 4): {self._client_manager.num_available()} and type {type(self._client_manager.num_available())}")
-
         #Below, define list of parameters of each client 
         self.list_parameters: List[Parameters] = [Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )] * self._client_manager.num_available()
-
-        log(INFO, f"Length of list parameters class var {len(self.list_parameters)}")
         
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -95,7 +91,7 @@ class Server:
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
-        print("Num Avail Clients: ", self._client_manager.num_available())
+
         # Initialize parameters
         log(INFO, "Initializing global parameters")
         self.list_parameters = self._get_initial_parameters(timeout=timeout)
@@ -293,13 +289,16 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
-        print("Random parameters sampled at get initial parameters method: ", type(get_parameters_res))
         log(INFO, "Received initial parameters from one random client")
         log(INFO, "Using parameters to initialise model for all clients")
 
         parameters_list = []
         for i in range(self._client_manager.num_available()):
-            param_val = ndarrays_to_parameters(parameters_to_ndarrays(get_parameters_res.parameters)*i)
+            param_first_val = parameters_to_ndarrays(get_parameters_res.parameters)
+            print(f"param first value: {param_first_val}")
+            param_second_val = param_first_val*i
+            print(f"param second value: {param_second_val}")
+            param_val = ndarrays_to_parameters(param_second_val)
             parameters_list.append(param_val)
 
         log(INFO, (f"Parameters list type: {type(parameters_list)} and length is {len(parameters_list)}"))
