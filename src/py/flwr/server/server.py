@@ -30,6 +30,8 @@ from flwr.common import (
     Parameters,
     ReconnectIns,
     Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
@@ -297,7 +299,8 @@ class Server:
 
         parameters_list = []
         for i in range(self._client_manager.num_available()):
-            parameters_list.append(get_parameters_res.parameters*i)
+            param_val = ndarrays_to_parameters(parameters_to_ndarrays(get_parameters_res.parameters)*i)
+            parameters_list.append(array_val)
 
         log(INFO, (f"Parameters list type: {type(parameters_list)} and length is {len(parameters_list)}"))
         return parameters_list
