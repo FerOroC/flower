@@ -285,9 +285,6 @@ class Server:
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
         )
-        if parameters is not None:
-            log(INFO, "Using initial parameters provided by strategy")
-            return parameters
 
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
