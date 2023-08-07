@@ -122,7 +122,6 @@ class Server:
             )
             if res_fit is not None:
                 parameters_list, fit_metrics, _ = res_fit  # fit_metrics_aggregated
-                log(INFO, f"Parameters after round {current_round} after fit round method are {parameters_list}")
                 if parameters_list:
                     self.list_parameters= parameters_list
                     print("length of parameters list right after fit_round in fit method Server class (should be = num client): ", len(self.list_parameters))
